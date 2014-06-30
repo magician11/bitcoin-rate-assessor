@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bitcoin">
+    <head>
+        <meta charset="utf-8">
+        <title>Bitcoin rate assessor</title>
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/css/foundation.min.css">
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/css/normalize.min.css">        
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/vendor/modernizr.js"></script>
+    </head>
+    <body ng-controller="BitcoinCtrl" ng-cloak>
+        <div class="panel radius text-center">
+            <h1>Bitcoin rate assessor</h1>
+            <h2><small>Live feeds from</small> <a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a> & <a href="https://bitcoinaverage.com"><img src="https://bitcoinaverage.com/img/logo_full_small.png"></a> & <a href="https://openexchangerates.org/"><img src="http://snowplowanalytics.com/assets/img/open-exchange-rates_small.png"></a></h2>
+        </div>
+
+        <div class="row">
+            <div class="columns large-6">
+                <h3>Bitcoin.co.id</h3>
+                <div class="panel callout radius">
+                    <h3><small>The latest ask is</small> {{calcPriceDifference()}} <small>the global average.</small></h3>
+                </div>
+                <dl class="accordion" data-accordion>
+                    <dd class="accordion-navigation">
+                        <a href="#latestAsks">View the latest 10 asks</a>
+                        <div id="latestAsks" class="content">
+                            <p><small>Roll over IDR values to view current USD equivalent.</small></p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th width="10">#</th>
+                                        <th width="400">1 BTC value</th>
+                                        <th width="400">BTC</th>
+                                        <th width="400">Asking price in IDR</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr ng-repeat="btcAsk in latestAsksFromBcId | limitTo:10">
+                                        <td>{{$index + 1}}</td>
+                                        <td currency-convert="USD">{{btcAsk[0]}}</td>
+                                        <td>{{btcAsk[1]}}</td>
+                                        <td currency-convert="USD">{{(btcAsk[0] * btcAsk[1]).toFixed(2)}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="columns large-6">
+                <h3>Bitcoin average price index</h3>
+                <div class="panel callout radius" ng-show="avgDataReady()">
+                    <h3>USD${{getUSDcurrAvg()}} <small>(latest global average)</small></h3>
+                </div>
+                <dl class="accordion" data-accordion>
+                    <dd class="accordion-navigation">
+                        <a href="#bcExchanges">View exchanges</a>
+                        <div id="bcExchanges" class="content">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th width="600">Exchange</th>
+                                        <th width="600">Bid</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <tr ng-repeat="exchange in bitcoinAvgUSDData['exchanges']">
+                                        <td>{{exchange.display_name}}</td>
+                                        <td>{{exchange.rates.bid | currency}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="large-12 columns text-center">
+                <footer>
+                    <hr/>
+                    <p>This web app was created by <a href="http://www.golightlyplus.com">Golightly+</a><img src="img/red-heart-icon.png"></p>
+                </footer>
+            </div>
+        </div>
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/vendor/jquery.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/foundation.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.17/angular.min.js"></script>
+        <script src="js/bitcoin.js"></script>
+        <script>
+            $(document).foundation();
+        </script>
+    </body>
+</html>
