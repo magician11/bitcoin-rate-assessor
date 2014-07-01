@@ -14,7 +14,7 @@
             <h2><small>Live feeds from</small> <a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a> & <a href="https://bitcoinaverage.com"><img src="https://bitcoinaverage.com/img/logo_full_small.png"></a> & <a href="https://openexchangerates.org/"><img src="http://snowplowanalytics.com/assets/img/open-exchange-rates_small.png"></a></h2>
         </div>
 
-        <div class="row">
+        <div class="row" ng-show="globalAvgDataReady()">
             <div class="columns large-6">
                 <h3>Bitcoin.co.id</h3>
                 <div class="panel callout radius">
@@ -51,25 +51,26 @@
 
             <div class="columns large-6">
                 <h3>Bitcoin average price index</h3>
-                <div class="panel callout radius" ng-show="avgDataReady()">
-                    <h3>USD${{getUSDcurrAvg()}} <small>(latest global average)</small></h3>
+                <div class="panel callout radius">
+                    <h3>USD${{bitcoinGlobalUSDAvg}} <small>(latest global average)</small></h3>
                 </div>
                 <dl class="accordion" data-accordion>
                     <dd class="accordion-navigation">
                         <a href="#bcExchanges">View exchanges</a>
                         <div id="bcExchanges" class="content">
+                            <p><small>Ordered by asks, largest to smallest.</small></p>
                             <table>
                                 <thead>
                                     <tr>
                                         <th width="600">Exchange</th>
-                                        <th width="600">Bid</th>
+                                        <th width="600">Ask</th>
                                     </tr>
                                 </thead>
                                 <tbody>
 
-                                    <tr ng-repeat="exchange in bitcoinAvgUSDData['exchanges']">
-                                        <td>{{exchange.display_name}}</td>
-                                        <td>{{exchange.rates.bid | currency}}</td>
+                                    <tr ng-repeat="exchange in bitcoinAvgExchanges | orderBy:'-ask'">
+                                        <td>{{exchange.name}}</td>
+                                        <td>{{exchange.ask | currency}}</td>
                                     </tr>
                                 </tbody>
                             </table>

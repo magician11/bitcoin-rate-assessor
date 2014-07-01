@@ -2,44 +2,33 @@ var bitcoinApp = angular.module("bitcoin", []);
 
 bitcoinApp.controller("BitcoinCtrl", function($scope, $http, CurrencyConversions) {
 
-    $scope.bitcoinAvgUSDData = {};
-    $scope.latestAsksFromBcId = {};
+    $scope.bitcoinAvgExchanges = [];
+    $scope.latestAsksFromBcId = [[0,0]];
+    $scope.bitcoinGlobalUSDAvg = 0;
 
     // calculate the percentage difference between the global average and the current cheapest ask on bitcoin.co.id
     $scope.calcPriceDifference = function() {
 
-        /*
-        if(angular.isUndefined($scope.latestAsksFromBcId[0][0]) || !CurrencyConversions.isReady()) {
-            return "calculating..";
-        }
-*/
-        var percentDiff = 0;
         var strAnswer = "";
+        var percentDiff = 0;
         var latestUSDequivFromBcId = CurrencyConversions.convertToUSD($scope.latestAsksFromBcId[0][0], 'IDR');
 
-        if(latestUSDequivFromBcId < $scope.getUSDcurrAvg()) {
+        if(latestUSDequivFromBcId < $scope.bitcoinGlobalUSDAvg) {
 
-            percentDiff = calcPercentage(latestUSDequivFromBcId, $scope.getUSDcurrAvg());
+            percentDiff = calcPercentage(latestUSDequivFromBcId, $scope.bitcoinGlobalUSDAvg);
             strAnswer = percentDiff.toFixed(2) + "% below";
         }
         else {
-            percentDiff = calcPercentage($scope.getUSDcurrAvg(), latestUSDequivFromBcId);
+            percentDiff = calcPercentage($scope.bitcoinGlobalUSDAvg, latestUSDequivFromBcId);
             strAnswer = percentDiff.toFixed(2) + "% above";
         }
 
         return strAnswer;
     };
+    
+    $scope.globalAvgDataReady = function() {
 
-    $scope.avgDataReady = function() {
-        return angular.isDefined($scope.bitcoinAvgUSDData['global_averages']['last']);
-    };
-
-    $scope.getUSDcurrAvg = function() {
-        
-        //if(angular.isDefined($scope.bitcoinAvgUSDData['global_averages']['last'])) {
-            return $scope.bitcoinAvgUSDData['global_averages']['last'];
-        //}
-        //return "calculating...";
+        return ($scope.bitcoinAvgExchanges.length > 1);
     };
 
     var calcPercentage = function(smallerNum, largerNum) {
@@ -52,7 +41,12 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, CurrencyConversions
         $http.get("https://api.bitcoinaverage.com/all")
         .success(function(data) {
 
-            $scope.bitcoinAvgUSDData = data['USD'];
+            $scope.bitcoinGlobalUSDAvg = data.USD.global_averages.last;
+
+            //convert arraylist of objects to an array (so I can use ng-filters)
+            for(var exchange in data.USD.exchanges) {
+                $scope.bitcoinAvgExchanges.push({name:data.USD.exchanges[exchange].display_name, ask:data.USD.exchanges[exchange].rates.ask});
+            }
         });
     };
 
@@ -91,7 +85,7 @@ bitcoinApp.directive("currencyConvert",function(CurrencyConversions) {
 // Service that converts from a currency into USD
 bitcoinApp.factory('CurrencyConversions', function ($http) {
 
-    var latestExchangeRates = {};
+    var latestExchangeRates = {'USD':0};
 
     $http.get("http://openexchangerates.org/api/latest.json?app_id=7bbeb62c36df464cbd9cfa47a9236803")
     .success(function(data) {
@@ -103,9 +97,6 @@ bitcoinApp.factory('CurrencyConversions', function ($http) {
         convertToUSD: function (value, origCurrency) {
 
             return (parseFloat(value) / parseFloat(latestExchangeRates[origCurrency])).toFixed(2);
-        },
-        isReady: function() {
-            return angular.isDefined(latestExchangeRates);
         }
     }
 });
