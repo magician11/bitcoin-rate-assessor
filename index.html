@@ -18,13 +18,13 @@
             <div class="columns large-6">
                 <h3>Bitcoin.co.id</h3>
                 <div class="panel callout radius">
-                    <h3><small>The latest ask is</small> {{calcPriceDifference()}} <small>the global average.</small></h3>
+                    <h3><small>The latest ask is</small> {{latestAgainstGlobalAvg()}} <small>the global average.</small></h3>
                 </div>
                 <dl class="accordion" data-accordion>
                     <dd class="accordion-navigation">
                         <a href="#latestAsks">View the latest 10 asks</a>
                         <div id="latestAsks" class="content">
-                            <p><small>Roll over IDR values to view current USD equivalent.</small></p>
+                            <p><small>Roll over IDR values to view current USD equivalent. Roll over BTC values to view running total.</small></p>
                             <table>
                                 <thead>
                                     <tr>
@@ -38,9 +38,9 @@
 
                                     <tr ng-repeat="btcAsk in latestAsksFromBcId | limitTo:10">
                                         <td>{{$index + 1}}</td>
-                                        <td currency-convert="USD">{{btcAsk[0]}}</td>
-                                        <td>{{btcAsk[1]}}</td>
-                                        <td currency-convert="USD">{{(btcAsk[0] * btcAsk[1]).toFixed(2)}}</td>
+                                        <td currency-convert>{{btcAsk[0]}}</td>
+                                        <td running-total currIndex="{{$index}}">{{btcAsk[1]}}</td>
+                                        <td currency-convert>{{(btcAsk[0] * btcAsk[1]).toFixed(2)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -58,19 +58,21 @@
                     <dd class="accordion-navigation">
                         <a href="#bcExchanges">View exchanges</a>
                         <div id="bcExchanges" class="content">
-                            <p><small>Ordered by asks, largest to smallest.</small></p>
+                            <p><small>Ordered by asks, largest to smallest. Exchanges hyperlinked to their respective sites.</small></p>
                             <table>
                                 <thead>
                                     <tr>
-                                        <th width="600">Exchange</th>
-                                        <th width="600">Ask</th>
+                                        <th width="400">Exchange</th>
+                                        <th width="400">They will buy for</th>
+                                        <th width="400">If sold here</th>
                                     </tr>
                                 </thead>
                                 <tbody>
 
                                     <tr ng-repeat="exchange in bitcoinAvgExchanges | orderBy:'-ask'">
-                                        <td>{{exchange.name}}</td>
+                                        <td><a href="{{exchange.url}}">{{exchange.name}}</a></td>
                                         <td>{{exchange.ask | currency}}</td>
+                                        <td>{{latestAgainstExchange(exchange.ask)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -84,7 +86,7 @@
             <div class="large-12 columns text-center">
                 <footer>
                     <hr/>
-                    <p>This web app was created by <a href="http://www.golightlyplus.com">Golightly+</a><img src="img/red-heart-icon.png"></p>
+                    <p>This web app was created by <a href="http://www.golightlyplus.com">Golightly+</a><img src="img/red-heart-icon.png"><br>If you found this app useful and would like to donate towards it, all donations appreciated <a href="http://www.golightlyplus.com/payments">here</a>.<br>If you have any suggestions for improvements to this app that you would find useful, <a href="http://www.golightlyplus.com/contact">get in touch</a>.</p>
                 </footer>
             </div>
         </div>
