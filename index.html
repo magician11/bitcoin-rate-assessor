@@ -15,6 +15,18 @@
         </div>
 
         <div class="row" ng-show="globalAvgDataReady()">
+            <div class="columns large-6 text-center small-centered" ng-show="globalAvgDataReady()">
+                <h3>Current exchange rates</h3>
+                <div class="panel">
+                    
+                    <h4>1 BTC = {{currentBTCvalue}} USD</h4>
+                    <h4>1 USD = {{currentIDRvalue}} IDR</h4>
+                
+                </div>
+            </div>
+        </div>  
+
+        <div class="row" ng-show="globalAvgDataReady()">
             <div class="columns large-6">
                 <h3>Bitcoin.co.id</h3>
                 <div class="panel callout radius">
@@ -69,7 +81,7 @@
                                 </thead>
                                 <tbody>
 
-                                    <tr ng-repeat="exchange in bitcoinAvgExchanges | orderBy:'-ask'">
+                                    <tr ng-repeat="exchange in bitcoinExchanges | orderBy:'-ask'">
                                         <td><a href="{{exchange.url}}">{{exchange.name}}</a></td>
                                         <td>{{exchange.ask | currency}}</td>
                                         <td>{{latestAgainstExchange(exchange.ask)}}</td>

@@ -1,8 +1,8 @@
 var bitcoinApp = angular.module("bitcoin", []);
 
-bitcoinApp.controller("BitcoinCtrl", function($scope, $http, CurrencyConversions) {
+bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, CurrencyConversions) {
 
-    $scope.bitcoinAvgExchanges = [];
+    $scope.bitcoinExchanges = [];
     $scope.latestAsksFromBcId = [[0,0]];
     $scope.bitcoinGlobalUSDAvg = 0;
 
@@ -53,7 +53,16 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, CurrencyConversions
 
     $scope.globalAvgDataReady = function() {
 
-        return ($scope.bitcoinAvgExchanges.length > 1);
+        if($scope.bitcoinExchanges.length > 1) {
+
+            $scope.currentBTCvalue = CurrencyConversions.currentBTCvalue();
+            $scope.currentIDRvalue = CurrencyConversions.currentIDRvalue();
+
+            return true;
+        }
+        else {
+            return false;
+        }
     };
 
     var calcPercentage = function(smallerNum, largerNum) {
@@ -68,9 +77,11 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, CurrencyConversions
 
             $scope.bitcoinGlobalUSDAvg = data.USD.global_averages.ask;
 
+            $scope.bitcoinExchanges = [];
+
             //convert arraylist of objects to an array (so I can use ng-filters)
             for(var exchange in data.USD.exchanges) {
-                $scope.bitcoinAvgExchanges.push({name:data.USD.exchanges[exchange].display_name, ask:data.USD.exchanges[exchange].rates.ask, url:data.USD.exchanges[exchange].display_URL});
+                $scope.bitcoinExchanges.push({name:data.USD.exchanges[exchange].display_name, ask:data.USD.exchanges[exchange].rates.ask, url:data.USD.exchanges[exchange].display_URL});
             }
         });
     };
@@ -85,8 +96,14 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, CurrencyConversions
         });
     };
 
+    var updateValues = function() {
+        getBcAvgPrices();    
+        getBcIdCurrSells();    
+    };
+
     getBcAvgPrices();
     getBcIdCurrSells();
+    $interval(updateValues, 60000);
 
 });
 
@@ -106,7 +123,7 @@ bitcoinApp.directive("runningTotal", function() {
             function calcCurrentBTCtotal() {
 
                 var currTotal = 0;
-                
+
                 for (var i = 0; i <= attrs.currindex; i++) {
                     currTotal += +scope.latestAsksFromBcId[i][1];
                 }
@@ -147,6 +164,14 @@ bitcoinApp.factory('CurrencyConversions', function ($http) {
         convertToUSD: function (value, origCurrency) {
 
             return (parseFloat(value) / parseFloat(latestExchangeRates[origCurrency])).toFixed(2);
+        },
+        currentBTCvalue: function() {
+
+            return parseFloat(1 / latestExchangeRates['BTC']).toFixed(2);
+        },
+        currentIDRvalue: function() {
+
+            return latestExchangeRates['IDR'].toFixed(2);
         }
     }
 });
