@@ -15,18 +15,6 @@
         </div>
 
         <div class="row" ng-show="globalAvgDataReady()">
-            <div class="columns large-6 text-center small-centered" ng-show="globalAvgDataReady()">
-                <h3>Current exchange rates</h3>
-                <div class="panel">
-                    
-                    <h4>1 BTC = {{currentBTCvalue}} USD</h4>
-                    <h4>1 USD = {{currentIDRvalue}} IDR</h4>
-                
-                </div>
-            </div>
-        </div>  
-
-        <div class="row" ng-show="globalAvgDataReady()">
             <div class="columns large-6">
                 <h3>Bitcoin.co.id</h3>
                 <div class="panel callout radius">
@@ -64,7 +52,7 @@
             <div class="columns large-6">
                 <h3>Bitcoin average price index</h3>
                 <div class="panel callout radius">
-                    <h3>USD${{bitcoinGlobalUSDAvg}} <small>(latest global average)</small></h3>
+                    <h3>USD{{bitcoinGlobalUSDAvg | currency}} <small>(latest global average)</small></h3>
                 </div>
                 <dl class="accordion" data-accordion>
                     <dd class="accordion-navigation">
@@ -93,15 +81,30 @@
                 </dl>
             </div>
         </div>
+        <footer>
+            <hr>
+            <div class="row">
+                <div class="large-4 columns">
+                    <p>This web app was created by <a href="http://www.golightlyplus.com">Golightly+</a>.</p>
+                    <p>Any suggestions on how to improve it? <a href="http://www.golightlyplus.com/contact">Share here</a>.</p>
+                </div>
+                <div class="large-4 columns">
+                    <h5>Donations welcome and appreciated</h5>
+                    <img src="http://golightlyplus.com/wp-content/uploads/2014/07/golightlyplus-qr.png" class="left">
+                    <p>1CCQCkmcHFTfgctthi3fBB5UJ1U6ejjBPh</p>
+                    <p>Other donation methods <a href="http://golightlyplus.com/payments/">available here</a>.</p>
+                </div>
+                <div class="large-4 columns">
+                    <h5>Current exchange rates</h5>
+                    <div class="panel">
 
-        <div class="row">
-            <div class="large-12 columns text-center">
-                <footer>
-                    <hr/>
-                    <p>This web app was created by <a href="http://www.golightlyplus.com">Golightly+</a><img src="img/red-heart-icon.png"><br>If you found this app useful and would like to donate towards it, all donations appreciated <a href="http://www.golightlyplus.com/payments">here</a>.<br>If you have any suggestions for improvements to this app that you would find useful, <a href="http://www.golightlyplus.com/contact">get in touch</a>.</p>
-                </footer>
+                        <h4>1 BTC = {{currentBTCvalue}} USD</h4>
+                        <h4>1 USD = {{currentIDRvalue}} IDR</h4>
+
+                    </div>
+                </div>
             </div>
-        </div>
+        </footer>
 
         <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/vendor/jquery.js"></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/foundation.min.js"></script>

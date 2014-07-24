@@ -72,17 +72,20 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
     // get bitcoin average prices in all currencies
     var getBcAvgPrices = function() {
 
-        $http.get("https://api.bitcoinaverage.com/all")
+        $http.get('http://bitcoin-golightlyplus.rhcloud.com/exchanges')
         .success(function(data) {
 
-            $scope.bitcoinGlobalUSDAvg = data.USD.global_averages.ask;
+            $scope.bitcoinExchanges = data;
+        });
+    };
 
-            $scope.bitcoinExchanges = [];
+    // get bitcoin average prices in all currencies
+    var getBcGlobalAvg = function() {
 
-            //convert arraylist of objects to an array (so I can use ng-filters)
-            for(var exchange in data.USD.exchanges) {
-                $scope.bitcoinExchanges.push({name:data.USD.exchanges[exchange].display_name, ask:data.USD.exchanges[exchange].rates.ask, url:data.USD.exchanges[exchange].display_URL});
-            }
+        $http.get('http://bitcoin-golightlyplus.rhcloud.com/latest_global_average')
+        .success(function(data) {
+
+            $scope.bitcoinGlobalUSDAvg = data;
         });
     };
 
@@ -98,11 +101,11 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
 
     var updateValues = function() {
         getBcAvgPrices();    
-        getBcIdCurrSells();    
+        getBcIdCurrSells();
+        getBcGlobalAvg();
     };
 
-    getBcAvgPrices();
-    getBcIdCurrSells();
+    updateValues();
     $interval(updateValues, 60000);
 
 });
@@ -152,7 +155,7 @@ bitcoinApp.directive("currencyConvert", function(CurrencyConversions) {
 // Service that converts from a currency into USD
 bitcoinApp.factory('CurrencyConversions', function ($http) {
 
-    var latestExchangeRates = {'USD':0};
+    var latestExchangeRates = {'USD':0, 'IDR':0, 'BTC':0};
 
     $http.get("http://openexchangerates.org/api/latest.json?app_id=7bbeb62c36df464cbd9cfa47a9236803")
     .success(function(data) {
