@@ -92,10 +92,10 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
     // get current sells for bitcoin at bitcoin.co.id
     var getBcIdCurrSells = function() {
 
-        $http.get("https://vip.bitcoin.co.id/api/btc_idr/depth")
+        $http.get('http://bitcoin-golightlyplus.rhcloud.com/latest_sells_bcid')
         .success(function(data) {
 
-            $scope.latestAsksFromBcId = data['sell'];
+            $scope.latestAsksFromBcId = data;
         });
     };
 
