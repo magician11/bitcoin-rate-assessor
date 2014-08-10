@@ -4,7 +4,7 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
 
     $scope.bitcoinExchanges = [];
     $scope.latestAsksFromBcId = [[0,0]];
-    $scope.bitcoinGlobalUSDAvg = 0;
+    $scope.bitcoinAvgPrices = {};
 
     // calculate the percentage difference between the current cheapest ask on bitcoin.co.id and a USD value
     var calcPercentDifference = function(usdValue) {
@@ -27,9 +27,9 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
         }
     };
 
-    $scope.latestAgainstGlobalAvg = function() {
+    $scope.latestAgainstUSDGlobalAvg = function() {
 
-        var percentDiff = calcPercentDifference($scope.bitcoinGlobalUSDAvg);
+        var percentDiff = calcPercentDifference($scope.bitcoinAvgPrices.USD);
 
         if(percentDiff.argLarger) {
             return percentDiff.percentage.toFixed(2) + "% below";
@@ -80,12 +80,12 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
     };
 
     // get bitcoin average prices in all currencies
-    var getBcGlobalAvg = function() {
+    var getBcGlobalAvgPrices = function() {
 
-        $http.get('http://bitcoin-golightlyplus.rhcloud.com/latest_global_average')
+        $http.get('http://bitcoin-golightlyplus.rhcloud.com/bitcoin_average_prices')
         .success(function(data) {
 
-            $scope.bitcoinGlobalUSDAvg = data;
+            $scope.bitcoinAvgPrices = data;
         });
     };
 
@@ -102,7 +102,7 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
     var updateValues = function() {
         getBcAvgPrices();    
         getBcIdCurrSells();
-        getBcGlobalAvg();
+        getBcGlobalAvgPrices();
     };
 
     updateValues();
