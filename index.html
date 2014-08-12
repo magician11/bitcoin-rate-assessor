@@ -10,13 +10,13 @@
     </head>
     <body ng-controller="BitcoinCtrl" ng-cloak>
         <div class="panel radius text-center">
-            <h1>Bitcoin rate assessor</h1>
-            <h2><small>Live feeds from</small> <a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a> & <a href="https://bitcoinaverage.com"><img src="https://bitcoinaverage.com/img/logo_full_small.png"></a> & <a href="https://openexchangerates.org/"><img src="http://snowplowanalytics.com/assets/img/open-exchange-rates_small.png"></a></h2>
+            <h1>Bitcoin Arbitrage Opportunity Analysis</h1>
+            <p>For buying from Bitcoin.co.id and selling to exchanges worldwide</p>
         </div>
 
-        <div class="row" ng-show="globalAvgDataReady()">
+        <div class="row" ng-show="appReady()">
             <div class="columns large-6">
-                <h3>Bitcoin.co.id</h3>
+                <h3><a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a></h3>
                 <div class="panel callout radius">
                     <h3><small>The latest ask is</small> {{latestAgainstUSDGlobalAvg()}} <small>the global average.</small></h3>
                 </div>
@@ -31,7 +31,7 @@
                                         <th width="10">#</th>
                                         <th width="400">1 BTC value</th>
                                         <th width="400">BTC</th>
-                                        <th width="400">Asking price in IDR</th>
+                                        <th width="400">Asking price (IDR)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -50,15 +50,14 @@
             </div>
 
             <div class="columns large-6">
-                <h3>Bitcoin average price index</h3>
+                <h3>Bitcoin Exchanges Worldwide</h3>
                 <div class="panel callout radius">
-                    <h3>USD{{bitcoinAvgPrices.USD | currency}} <small>(latest global average)</small></h3>
+                    <h3>USD{{bitcoinAvgPrices.USD | currency}} <small>(latest Bitcoin value)</small></h3>
                 </div>
                 <dl class="accordion" data-accordion>
                     <dd class="accordion-navigation">
                         <a href="#bcExchanges">View exchanges</a>
                         <div id="bcExchanges" class="content">
-                            <p><small>Ordered by asks, largest to smallest. Exchanges hyperlinked to their respective sites.</small></p>
                             <table>
                                 <thead>
                                     <tr>
@@ -69,10 +68,10 @@
                                 </thead>
                                 <tbody>
 
-                                    <tr ng-repeat="exchange in bitcoinExchanges | orderBy:'-ask'">
+                                    <tr ng-repeat="exchange in bitcoinExchanges | orderBy:'-bid'">
                                         <td><a href="{{exchange.url}}">{{exchange.name}}</a></td>
-                                        <td>{{exchange.ask | currency}}</td>
-                                        <td>{{latestAgainstExchange(exchange.ask)}}</td>
+                                        <td>{{exchange.bid | currency}}</td>
+                                        <td>{{latestAgainstExchange(exchange.bid)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -108,7 +107,9 @@
 
         <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/vendor/jquery.js"></script>
         <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/foundation.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.17/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.17/angular.min.js"></script>
+        <script src="https://cdn.firebase.com/js/client/1.0.18/firebase.js"></script>
+        <script src="https://cdn.firebase.com/libs/angularfire/0.8.0/angularfire.min.js"></script>
         <script src="js/bitcoin.js"></script>
         <script>
             $(document).foundation();

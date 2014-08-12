@@ -1,12 +1,12 @@
-var bitcoinApp = angular.module("bitcoin", []);
+var bitcoinApp = angular.module("bitcoin", ["firebase"]);
 
-bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, CurrencyConversions) {
+bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConversions, $firebase) {
 
     $scope.bitcoinExchanges = [];
-    $scope.latestAsksFromBcId = [[0,0]];
-    $scope.bitcoinAvgPrices = {};
+    $scope.latestAsksFromBcId = [];
+    $scope.bitcoinAvgPrices = CurrencyConversions.getBTCAvgPrices();
 
-    // calculate the percentage difference between the current cheapest ask on bitcoin.co.id and a USD value
+    // calculate the percentage difference between the current cheapest ask on bitcoin.co.id and a USD buy value
     var calcPercentDifference = function(usdValue) {
 
         var latestUSDequivFromBcId = CurrencyConversions.convertToUSD($scope.latestAsksFromBcId[0][0], 'IDR');
@@ -29,85 +29,71 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $http, $interval, Currency
 
     $scope.latestAgainstUSDGlobalAvg = function() {
 
-        var percentDiff = calcPercentDifference($scope.bitcoinAvgPrices.USD);
+        if($scope.appReady()) {
+            var percentDiff = calcPercentDifference($scope.bitcoinAvgPrices.USD);
 
-        if(percentDiff.argLarger) {
-            return percentDiff.percentage.toFixed(2) + "% below";
-        }
-        else {
-            return percentDiff.percentage.toFixed(2) + "% above";
-        }
-    };
-
-    $scope.latestAgainstExchange = function(exchangeAsk) {
-
-        var percentDiff = calcPercentDifference(exchangeAsk);
-
-        if(percentDiff.argLarger) {
-            return percentDiff.percentage.toFixed(2) + "% profit";
-        }
-        else {
-            return percentDiff.percentage.toFixed(2) + "% loss";
+            if(percentDiff.argLarger) {
+                return percentDiff.percentage.toFixed(2) + "% below";
+            }
+            else {
+                return percentDiff.percentage.toFixed(2) + "% above";
+            }
         }
     };
 
-    $scope.globalAvgDataReady = function() {
+    $scope.latestAgainstExchange = function(exchangeBid) {
 
-        if($scope.bitcoinExchanges.length > 1) {
+        if($scope.appReady()) {
+            var percentDiff = calcPercentDifference(exchangeBid);
 
-            $scope.currentBTCvalue = CurrencyConversions.currentBTCvalue();
-            $scope.currentIDRvalue = CurrencyConversions.currentIDRvalue();
-
-            return true;
+            if(percentDiff.argLarger) {
+                return percentDiff.percentage.toFixed(2) + "% profit";
+            }
+            else {
+                return percentDiff.percentage.toFixed(2) + "% loss";
+            }
         }
-        else {
-            return false;
-        }
+    };
+
+    $scope.appReady = function() {
+
+        return (($scope.bitcoinExchanges.length > 1)
+                && angular.isDefined($scope.bitcoinAvgPrices.USD)
+                && ($scope.latestAsksFromBcId.length > 1));
     };
 
     var calcPercentage = function(smallerNum, largerNum) {
         return 100 - ((smallerNum / largerNum) * 100);
     };
 
-    // get bitcoin average prices in all currencies
-    var getBcAvgPrices = function() {
+    // get BTC buyers
+    var initBcAvgPrices = function() {
 
-        $http.get('http://bitcoin-golightlyplus.rhcloud.com/exchanges')
-        .success(function(data) {
-
-            $scope.bitcoinExchanges = data;
-        });
+        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/buyers');
+        var sync = $firebase(ref);
+        $scope.bitcoinExchanges = sync.$asArray();
     };
 
     // get bitcoin average prices in all currencies
-    var getBcGlobalAvgPrices = function() {
+    var initBcGlobalAvgPrices = function() {
 
-        $http.get('http://bitcoin-golightlyplus.rhcloud.com/bitcoin_average_prices')
-        .success(function(data) {
-
-            $scope.bitcoinAvgPrices = data;
-        });
+        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
+        var sync = $firebase(ref);
+        var syncObject = sync.$asObject();
+        syncObject.$bindTo($scope, "bitcoinAvgPrices");
     };
 
     // get current sells for bitcoin at bitcoin.co.id
-    var getBcIdCurrSells = function() {
+    var initBcIdCurrSells = function() {
 
-        $http.get('http://bitcoin-golightlyplus.rhcloud.com/latest_sells_bcid')
-        .success(function(data) {
-
-            $scope.latestAsksFromBcId = data;
-        });
+        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/sellers/bitcoincoid/sells');
+        var sync = $firebase(ref);
+        $scope.latestAsksFromBcId = sync.$asArray();
     };
 
-    var updateValues = function() {
-        getBcAvgPrices();    
-        getBcIdCurrSells();
-        getBcGlobalAvgPrices();
-    };
-
-    updateValues();
-    $interval(updateValues, 60000);
-
+    initBcAvgPrices();    
+    initBcIdCurrSells();
+    initBcGlobalAvgPrices();
 });
 
 bitcoinApp.directive("runningTotal", function() {
@@ -153,28 +139,20 @@ bitcoinApp.directive("currencyConvert", function(CurrencyConversions) {
 });
 
 // Service that converts from a currency into USD
-bitcoinApp.factory('CurrencyConversions', function ($http) {
+bitcoinApp.factory('CurrencyConversions', function ($firebase) {
 
-    var latestExchangeRates = {'USD':0, 'IDR':0, 'BTC':0};
+    var bitcoinAvgPrices = {};
 
-    $http.get("http://openexchangerates.org/api/latest.json?app_id=7bbeb62c36df464cbd9cfa47a9236803")
-    .success(function(data) {
-
-        latestExchangeRates = data['rates'];
-    });
+    var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
+    var sync = $firebase(ref);
+    bitcoinAvgPrices = sync.$asObject();
 
     return {
         convertToUSD: function (value, origCurrency) {
-
-            return (parseFloat(value) / parseFloat(latestExchangeRates[origCurrency])).toFixed(2);
+            return ((value / bitcoinAvgPrices[origCurrency]) * bitcoinAvgPrices.USD).toFixed(2);
         },
-        currentBTCvalue: function() {
-
-            return parseFloat(1 / latestExchangeRates['BTC']).toFixed(2);
-        },
-        currentIDRvalue: function() {
-
-            return latestExchangeRates['IDR'].toFixed(2);
+        getBTCAvgPrices: function() {
+            return bitcoinAvgPrices;
         }
     }
 });
