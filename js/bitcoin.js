@@ -94,6 +94,17 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
     initBcAvgPrices();    
     initBcIdCurrSells();
     initBcGlobalAvgPrices();
+
+    $scope.alertForm = {};
+    $scope.alertForm.submitUserDetails = function(item, event) {
+        console.log("Adding alert for " + $scope.alertForm.name + " for email " + $scope.alertForm.email +
+                    " for values over " + $scope.alertForm.percentDiff);
+        $scope.alertForm.name = '';
+        $scope.alertForm.email = '';
+        $scope.alertForm.percentDiff = '';
+        
+        $scope.alertForm.success = true;
+    };
 });
 
 bitcoinApp.directive("runningTotal", function() {

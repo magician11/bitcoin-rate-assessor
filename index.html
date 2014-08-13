@@ -19,6 +19,42 @@
                 <h3><a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a></h3>
                 <div class="panel callout radius">
                     <h3><small>The latest ask is</small> {{latestAgainstUSDGlobalAvg()}} <small>the global average.</small></h3>
+                    <span><img src="http://icons.iconarchive.com/icons/hooktraffic/seo/64/Rocket-Traffic-Ship-icon.png">Interested in receiving alerts? <a href="#" data-reveal-id="signupModal" ng-click="alertForm.success = false;">Click here</a>.</span>
+
+                    <div id="signupModal" class="reveal-modal medium text-center" data-reveal>
+                        <h3>Instant Email Notifications</h3>
+                        <a class="close-reveal-modal">&#215;</a>
+                        <div data-alert class="alert-box success radius" ng-show="alertForm.success">
+                            Your alert request has been successfully received.
+                        </div>
+                        <div ng-hide="alertForm.success">
+                            <p>Want to know when the percentage difference goes above a certain value? Sign up below.</p>
+                            <form ng-submit="alertForm.submitUserDetails()" >
+                                <div class="row">
+                                    <div class="small-6 columns small-centered">
+                                        <label>Your name
+                                            <input type="text" ng-model="alertForm.name">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-6 columns small-centered">
+                                        <label>Email address
+                                            <input type="email" ng-model="alertForm.email">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="small-6 columns small-centered">
+                                        <label>Send email alert when the percentage difference is equal or greater than..
+                                            <input type="number" name="percentDiff" min="1" max="10" ng-model="alertForm.percentDiff">
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="button radius">Submit</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <dl class="accordion" data-accordion>
                     <dd class="accordion-navigation">
@@ -52,7 +88,7 @@
             <div class="columns large-6">
                 <h3>Bitcoin Exchanges Worldwide</h3>
                 <div class="panel callout radius">
-                    <h3>USD{{bitcoinAvgPrices.USD | currency}} <small>(latest Bitcoin value)</small></h3>
+                    <h3>USD{{bitcoinAvgPrices.USD | currency}} <small>(latest bitcoin average price)</small></h3>
                 </div>
                 <dl class="accordion" data-accordion>
                     <dd class="accordion-navigation">
