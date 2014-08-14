@@ -97,13 +97,22 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
 
     $scope.alertForm = {};
     $scope.alertForm.submitUserDetails = function(item, event) {
-        console.log("Adding alert for " + $scope.alertForm.name + " for email " + $scope.alertForm.email +
-                    " for values over " + $scope.alertForm.percentDiff);
+        
+        // write the new alert to the db
+        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/alerts');
+        var sync = $firebase(ref);
+        var alertData = {};
+        alertData[$scope.alertForm.name] = {email: $scope.alertForm.email, percentDiff: $scope.alertForm.percentDiff, active: true};
+        sync.$update(alertData);
+
+        $scope.alertForm.success = true; // display success message and hide form
+    };
+
+    $scope.alertForm.clearForm = function() {
         $scope.alertForm.name = '';
         $scope.alertForm.email = '';
         $scope.alertForm.percentDiff = '';
-        
-        $scope.alertForm.success = true;
+        $scope.alertForm.success = false;
     };
 });
 

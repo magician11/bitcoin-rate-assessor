@@ -19,16 +19,18 @@
                 <h3><a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a></h3>
                 <div class="panel callout radius">
                     <h3><small>The latest ask is</small> {{latestAgainstUSDGlobalAvg()}} <small>the global average.</small></h3>
-                    <span><img src="http://icons.iconarchive.com/icons/hooktraffic/seo/64/Rocket-Traffic-Ship-icon.png">Interested in receiving alerts? <a href="#" data-reveal-id="signupModal" ng-click="alertForm.success = false;">Click here</a>.</span>
+                    <span><img src="http://icons.iconarchive.com/icons/hooktraffic/seo/64/Rocket-Traffic-Ship-icon.png">Interested in receiving alerts? <a href="#" data-reveal-id="signupModal" ng-click="alertForm.clearForm()">Click here</a>.</span>
 
                     <div id="signupModal" class="reveal-modal medium text-center" data-reveal>
                         <h3>Instant Email Notifications</h3>
                         <a class="close-reveal-modal">&#215;</a>
                         <div data-alert class="alert-box success radius" ng-show="alertForm.success">
-                            Your alert request has been successfully received.
+                            <p>Thank you {{alertForm.name}}!</p>
+                            <p>Your alert request has been successfully received.</p>
+                            <p>You will be notified when the latest ask drops {{alertForm.percentDiff}}% below the global average.</p>
                         </div>
                         <div ng-hide="alertForm.success">
-                            <p>Want to know when the percentage difference goes above a certain value? Sign up below.</p>
+                            <p>To get notified instantly when the % difference goes above a certain value, sign up below.</p>
                             <form ng-submit="alertForm.submitUserDetails()" >
                                 <div class="row">
                                     <div class="small-6 columns small-centered">
@@ -46,8 +48,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="small-6 columns small-centered">
-                                        <label>Send email alert when the percentage difference is equal or greater than..
-                                            <input type="number" name="percentDiff" min="1" max="10" ng-model="alertForm.percentDiff">
+                                        <label>Alert me when the % difference is >=
+                                            <input type="number" name="percentDiff" min="0" max="100" step="any" ng-model="alertForm.percentDiff">
                                         </label>
                                     </div>
                                 </div>
