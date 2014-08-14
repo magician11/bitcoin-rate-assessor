@@ -9,7 +9,7 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
     // calculate the percentage difference between the current cheapest ask on bitcoin.co.id and a USD buy value
     var calcPercentDifference = function(usdValue) {
 
-        var latestUSDequivFromBcId = CurrencyConversions.convertToUSD($scope.latestAsksFromBcId[0][0], 'IDR');
+        var latestUSDequivFromBcId = CurrencyConversions.convertToUSD($scope.latestAsksFromBcId[0].btcValue, 'IDR');
 
         if(latestUSDequivFromBcId < usdValue) {
 
@@ -67,7 +67,7 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
     };
 
     // get BTC buyers
-    var initBcAvgPrices = function() {
+    var syncBcAvgPrices = function() {
 
         var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/buyers');
         var sync = $firebase(ref);
@@ -75,7 +75,7 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
     };
 
     // get bitcoin average prices in all currencies
-    var initBcGlobalAvgPrices = function() {
+    var syncBcGlobalAvgPrices = function() {
 
         var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
         var sync = $firebase(ref);
@@ -84,25 +84,25 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
     };
 
     // get current sells for bitcoin at bitcoin.co.id
-    var initBcIdCurrSells = function() {
+    var syncBcIdCurrSells = function() {
 
-        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/sellers/bitcoincoid/sells');
-        var sync = $firebase(ref);
-        $scope.latestAsksFromBcId = sync.$asArray();
+        var bcIdref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/sellers/bitcoincoid/sells');
+        var syncSells = $firebase(bcIdref);
+        $scope.latestAsksFromBcId = syncSells.$asArray();
     };
 
-    initBcAvgPrices();    
-    initBcIdCurrSells();
-    initBcGlobalAvgPrices();
+    syncBcAvgPrices();    
+    syncBcIdCurrSells();
+    syncBcGlobalAvgPrices();
 
     $scope.alertForm = {};
     $scope.alertForm.submitUserDetails = function(item, event) {
-        
+
         // write the new alert to the db
         var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/alerts');
         var sync = $firebase(ref);
         var alertData = {};
-        alertData[$scope.alertForm.name] = {email: $scope.alertForm.email, percentDiff: $scope.alertForm.percentDiff, active: true};
+        alertData[$scope.alertForm.name] = {email: $scope.alertForm.email, percentDiff: $scope.alertForm.percentDiff};
         sync.$update(alertData);
 
         $scope.alertForm.success = true; // display success message and hide form
@@ -134,7 +134,7 @@ bitcoinApp.directive("runningTotal", function() {
                 var currTotal = 0;
 
                 for (var i = 0; i <= attrs.currindex; i++) {
-                    currTotal += +scope.latestAsksFromBcId[i][1];
+                    currTotal += +scope.latestAsksFromBcId[i].btcAmnt;
                 }
 
                 return currTotal.toFixed(8);

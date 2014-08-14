@@ -76,9 +76,9 @@
 
                                     <tr ng-repeat="btcAsk in latestAsksFromBcId | limitTo:10">
                                         <td>{{$index + 1}}</td>
-                                        <td currency-convert>{{btcAsk[0]}}</td>
-                                        <td running-total currIndex="{{$index}}">{{btcAsk[1]}}</td>
-                                        <td currency-convert>{{(btcAsk[0] * btcAsk[1]).toFixed(2)}}</td>
+                                        <td currency-convert>{{btcAsk.btcValue}}</td>
+                                        <td running-total currIndex="{{$index}}">{{btcAsk.btcAmnt}}</td>
+                                        <td currency-convert>{{(btcAsk.btcValue * btcAsk.btcAmnt).toFixed(2)}}</td>
                                     </tr>
                                 </tbody>
                             </table>
