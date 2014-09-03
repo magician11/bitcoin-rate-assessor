@@ -1,6 +1,6 @@
-var bitcoinApp = angular.module("bitcoin", ["firebase"]);
+var bitcoinApp = angular.module('bitcoin', ['firebase', 'mm.foundation']);
 
-bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConversions, $firebase) {
+bitcoinApp.controller("BitcoinCtrl", function($scope, CurrencyConversions, $firebase) {
 
     $scope.bitcoinExchanges = [];
     $scope.latestAsksFromBcId = [];
@@ -66,54 +66,24 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, $interval, CurrencyConvers
         return 100 - ((smallerNum / largerNum) * 100);
     };
 
-    // get BTC buyers
-    var syncBcAvgPrices = function() {
+    var ref, sync;
 
-        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/buyers');
-        var sync = $firebase(ref);
-        $scope.bitcoinExchanges = sync.$asArray();
-    };
+    // get BTC buyers
+    ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/buyers');
+    sync = $firebase(ref);
+    $scope.bitcoinExchanges = sync.$asArray();
 
     // get bitcoin average prices in all currencies
-    var syncBcGlobalAvgPrices = function() {
+    ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
+    sync = $firebase(ref);
+    var syncObject = sync.$asObject();
+    syncObject.$bindTo($scope, "bitcoinAvgPrices");
 
-        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
-        var sync = $firebase(ref);
-        var syncObject = sync.$asObject();
-        syncObject.$bindTo($scope, "bitcoinAvgPrices");
-    };
 
     // get current sells for bitcoin at bitcoin.co.id
-    var syncBcIdCurrSells = function() {
-
-        var bcIdref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/sellers/bitcoincoid/sells');
-        var syncSells = $firebase(bcIdref);
-        $scope.latestAsksFromBcId = syncSells.$asArray();
-    };
-
-    syncBcAvgPrices();    
-    syncBcIdCurrSells();
-    syncBcGlobalAvgPrices();
-
-    $scope.alertForm = {};
-    $scope.alertForm.submitUserDetails = function(item, event) {
-
-        // write the new alert to the db
-        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/alerts');
-        var sync = $firebase(ref);
-        var alertData = {};
-        alertData[$scope.alertForm.name] = {email: $scope.alertForm.email, percentDiff: $scope.alertForm.percentDiff};
-        sync.$update(alertData);
-
-        $scope.alertForm.success = true; // display success message and hide form
-    };
-
-    $scope.alertForm.clearForm = function() {
-        $scope.alertForm.name = '';
-        $scope.alertForm.email = '';
-        $scope.alertForm.percentDiff = '';
-        $scope.alertForm.success = false;
-    };
+    var bcIdref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/sellers/bitcoincoid/sells');
+    var syncSells = $firebase(bcIdref);
+    $scope.latestAsksFromBcId = syncSells.$asArray();
 });
 
 bitcoinApp.directive("runningTotal", function() {
@@ -143,20 +113,21 @@ bitcoinApp.directive("runningTotal", function() {
     };
 });
 
-// perform a currency conversion from IDR to USD on mouse rollover
 bitcoinApp.directive("currencyConvert", function(CurrencyConversions) {
-    return function(scope, element, attrs) {
-        element.bind("mouseenter", function() {
-            scope.tmpValue = element.text();
-            element.text(CurrencyConversions.convertToUSD(element.text(), 'IDR'));
-        });
+    return {
+        restrict: 'A',
+        scope: {
+            idrval: '@'
+        },
+        template: '<span class="has-tip" tooltip="${{convertIDRtoUSD(idrval)}} USD" tooltip-animation="false">{{idrval}}</span>',
+        link: function(scope) {
+            scope.convertIDRtoUSD = function(idrValue) {
 
-        element.bind("mouseleave", function() {
-            element.text(scope.tmpValue);
-
-        });
+                return CurrencyConversions.convertToUSD(idrValue, 'IDR');
+            };
+        }
     };
-});
+}); 
 
 // Service that converts from a currency into USD
 bitcoinApp.factory('CurrencyConversions', function ($firebase) {
@@ -176,3 +147,43 @@ bitcoinApp.factory('CurrencyConversions', function ($firebase) {
         }
     }
 });
+
+bitcoinApp.controller("ModalAlertCtrl", function($scope, $modal, $log) {
+
+    $scope.open = function () {
+
+        var modalInstance = $modal.open({
+            templateUrl: 'myModalContent.html',
+            controller: ModalInstanceCtrl
+        });
+
+    };
+});
+
+var ModalInstanceCtrl = function ($scope, $modalInstance, $firebase) {
+
+    $scope.alertForm = {};
+
+    $scope.submitAlert = function () {
+        // write the new alert to the db
+        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/alerts');
+        var sync = $firebase(ref);
+        var alertData = {};
+        alertData[$scope.alertForm.name] = {email: $scope.alertForm.email, percentDiff: $scope.alertForm.percentDiff};
+        sync.$update(alertData);
+
+        $scope.alertForm.success = true; // display success message and hide form
+    };
+
+    $modalInstance.opened.then(function() {
+
+        $scope.alertForm.name = '';
+        $scope.alertForm.email = '';
+        $scope.alertForm.percentDiff = '';
+        $scope.alertForm.success = false;
+    });
+
+    $scope.cancel = function () {
+        $modalInstance.dismiss('cancel');
+    };
+};
