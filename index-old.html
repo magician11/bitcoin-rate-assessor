@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="bitcoin">
+    <head>
+        <meta charset="utf-8">
+        <title>Bitcoin rate assessor</title>
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/css/foundation.min.css">
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/css/normalize.min.css">        
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/foundation/5.2.3/js/vendor/modernizr.js"></script>
+    </head>
+    <body ng-controller="BitcoinCtrl" ng-cloak>
+        <div class="panel radius text-center">
+            <h1>Bitcoin Arbitrage Opportunity Analysis</h1>
+            <p>For buying from Bitcoin.co.id and selling to exchanges worldwide</p>
+        </div>
+
+        <div class="row" ng-show="appReady()">
+            <div class="columns large-6">
+                <h3><a href="https://www.bitcoin.co.id/"><img src="https://vip.bitcoin.co.id/home-assets/img/logobtc.png"></a></h3>
+                <div class="panel callout radius">
+                    <h3><small>The latest ask is</small> {{latestAgainstUSDGlobalAvg()}} <small>the global average.</small></h3>
+
+                    <div ng-controller="ModalAlertCtrl">
+                        <p><img src="img/rocket-launch-run-icon.png">Interested in receiving alerts? <a href="#" ng-click="open()">Click here</a>.</p>
+                    </div>
+
+                    <script type="text/ng-template" id="myModalContent.html">
+                        <div class="text-center">
+                            <h3>Instant Email Notifications</h3>
+                            <div data-alert class="alert-box success radius" ng-show="alertForm.success">
+                                <p>Thank you {{alertForm.name}}!</p>
+                                <p>Your alert request has been successfully received.</p>
+                                <p>You will be notified when the latest ask drops {{alertForm.percentDiff}}% below the global average.</p>
+                            </div>
+                            <div ng-hide="alertForm.success">
+                                <p>Get alerts when the latest ask is any value below the global average.</p>
+                                <form ng-submit="alertForm.submitUserDetails()" >
+                                    <div class="row">
+                                        <div class="small-6 columns small-centered">
+                                            <label>Your name
+                                                <input type="text" ng-model="alertForm.name">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="small-6 columns small-centered">
+                                            <label>Email address
+                                                <input type="email" ng-model="alertForm.email">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="small-6 columns small-centered">
+                                            <label>What percentage below the global average?
+                                                <input type="number" name="percentDiff" min="0" max="100" step="any" ng-model="alertForm.percentDiff">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button ng-click="submitAlert()" class="button radius">Submit</button>
+                                </form>
+                            </div>
+                            <a class="close-reveal-modal" ng-click="cancel()">&#215;</a>
+                        </div>
+                    </script>
+                </div>
+                <accordion close-others="oneAtATime">
+                    <accordion-group heading="View the latest 10 asks">
+                        <p><small>Roll over IDR values to view current USD equivalent. Roll over BTC values to view running total.</small></p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="10">#</th>
+                                    <th width="400">1 BTC value</th>
+                                    <th width="400">BTC</th>
+                                    <th width="400">Asking price (IDR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr ng-repeat="btcAsk in latestAsksFromBcId | limitTo:10">
+                                    <td>{{$index + 1}}</td>
+                                    <td currency-convert idrVal="{{btcAsk.btcValue}}"></td>
+                                    <td running-total currIndex="{{$index}}">{{btcAsk.btcAmnt}}</td>
+                                    <td currency-convert idrVal="{{(btcAsk.btcValue * btcAsk.btcAmnt).toFixed(2)}}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </accordion-group>
+                </accordion>
+            </div>
+
+
+
+            <div class="columns large-6">
+                <h3>Bitcoin Exchanges Worldwide</h3>
+                <div class="panel callout radius">
+                    <h3>USD{{bitcoinAvgPrices.USD | currency}} <small>(latest bitcoin average price)</small></h3>
+                </div>
+                <accordion close-others="oneAtATime">
+                    <accordion-group heading="View exchanges">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="400">Exchange</th>
+                                    <th width="400">They will buy for</th>
+                                    <th width="400">If sold here</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr ng-repeat="exchange in bitcoinExchanges | orderBy:'-bid'">
+                                    <td><a href="{{exchange.url}}">{{exchange.name}}</a></td>
+                                    <td>{{exchange.bid | currency}}</td>
+                                    <td>{{latestAgainstExchange(exchange.bid)}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </accordion-group>
+                </accordion>
+            </div>
+        </div>
+        <footer>
+            <hr>
+            <div class="row">
+                <div class="large-4 columns">
+                    <p>This web app was created by <a href="http://www.golightlyplus.com">Golightly+</a>.</p>
+                    <p>Any suggestions on how to improve it? <a href="http://www.golightlyplus.com/contact">Share here</a>.</p>
+                </div>
+                <div class="large-4 columns text-center">
+                    <h5>Donations welcome and appreciated</h5>
+                    <img src="http://golightlyplus.com/wp-content/uploads/2014/07/golightlyplus-qr.png">
+                    <p>1CCQCkmcHFTfgctthi3fBB5UJ1U6ejjBPh</p>
+                    <p>Other donation methods <a href="http://golightlyplus.com/payments/">available here</a>.</p>
+                </div>
+                <div class="large-4 columns">
+                    <h5>Current exchange rates</h5>
+                    <div class="panel">
+
+                        <h4 ng-repeat="(currency, value) in bitcoinAvgPrices">
+                            1 BTC = {{value}} {{currency}}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- AngularJS -->
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+        <!-- Firebase -->
+        <script src="https://cdn.firebase.com/js/client/2.2.4/firebase.js"></script>
+        <!-- AngularFire -->
+        <script src="https://cdn.firebase.com/libs/angularfire/1.1.1/angularfire.min.js"></script>
+        <script src="js/mm-foundation.js"></script>
+        <script src="js/bitcoin.js"></script>
+    </body>
+</html>
