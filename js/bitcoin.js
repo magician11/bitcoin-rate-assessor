@@ -1,6 +1,15 @@
 var bitcoinApp = angular.module('bitcoin', ['firebase', 'mm.foundation']);
 
-bitcoinApp.controller("BitcoinCtrl", function($scope, CurrencyConversions, $firebase) {
+bitcoinApp.factory("FirebaseConfig", function() {
+
+    var baseUrl = "https://popping-heat-7331.firebaseio.com/bitcoin-rate-assessor";
+
+    return {
+        baseUrl: baseUrl
+    };
+});
+
+bitcoinApp.controller("BitcoinCtrl", function($scope, CurrencyConversions, $firebase, FirebaseConfig) {
 
     $scope.bitcoinExchanges = [];
     $scope.latestAsksFromBcId = [];
@@ -66,22 +75,23 @@ bitcoinApp.controller("BitcoinCtrl", function($scope, CurrencyConversions, $fire
         return 100 - ((smallerNum / largerNum) * 100);
     };
 
+    var firebaseBaseUrl = FirebaseConfig.baseUrl;
     var ref, sync;
 
     // get BTC buyers
-    ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/buyers');
+    ref = new Firebase(firebaseBaseUrl + 'buyers');
     sync = $firebase(ref);
     $scope.bitcoinExchanges = sync.$asArray();
 
     // get bitcoin average prices in all currencies
-    ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
+    ref = new Firebase(firebaseBaseUrl + 'currencies');
     sync = $firebase(ref);
     var syncObject = sync.$asObject();
     syncObject.$bindTo($scope, "bitcoinAvgPrices");
 
 
     // get current sells for bitcoin at bitcoin.co.id
-    var bcIdref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/sellers/bitcoincoid/sells');
+    var bcIdref = new Firebase(firebaseBaseUrl + 'sellers/bitcoincoid/sells');
     var syncSells = $firebase(bcIdref);
     $scope.latestAsksFromBcId = syncSells.$asArray();
 });
@@ -130,11 +140,12 @@ bitcoinApp.directive("currencyConvert", function(CurrencyConversions) {
 }); 
 
 // Service that converts from a currency into USD
-bitcoinApp.factory('CurrencyConversions', function ($firebase) {
+bitcoinApp.factory('CurrencyConversions', function ($firebase, FirebaseConfig) {
 
     var bitcoinAvgPrices = {};
 
-    var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/currencies');
+    var firebaseBaseUrl = FirebaseConfig.baseUrl;
+    var ref = new Firebase(firebaseBaseUrl + 'currencies');
     var sync = $firebase(ref);
     bitcoinAvgPrices = sync.$asObject();
 
@@ -160,13 +171,14 @@ bitcoinApp.controller("ModalAlertCtrl", function($scope, $modal, $log) {
     };
 });
 
-var ModalInstanceCtrl = function ($scope, $modalInstance, $firebase) {
+var ModalInstanceCtrl = function ($scope, $modalInstance, $firebase, FirebaseConfig) {
 
     $scope.alertForm = {};
 
     $scope.submitAlert = function () {
         // write the new alert to the db
-        var ref = new Firebase('https://luminous-fire-4988.firebaseio.com/bitcoin/alerts');
+        var firebaseBaseUrl = FirebaseConfig.baseUrl;
+        var ref = new Firebase(firebaseBaseUrl + 'alerts');
         var sync = $firebase(ref);
         var alertData = {};
         alertData[$scope.alertForm.name] = {email: $scope.alertForm.email, percentDiff: $scope.alertForm.percentDiff};

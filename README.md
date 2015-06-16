@@ -5,4 +5,4 @@ One page web app (implemented using AngularJS) that reads data from an [Indonesi
 
 You can see a live demo [here](http://bitcoin.golightlyplus.com).
 
-Any questions, email me at andrew@golightlyplus.com
+Any questions, email me at support@andrewgolightly.com
